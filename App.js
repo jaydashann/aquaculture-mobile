@@ -7,6 +7,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import WelcomeScreen from "./screens/welcomeScreen";
 import MainScreen from "./screens/mainScreen";
 import NotificationsScreen from "./screens/notificationsScreen";
+import NotificationDetailScreen from "./screens/NotificationDetailScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +20,11 @@ function RootNav() {
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Main" component={MainScreen} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
+        <Stack.Screen
+          name="NotificationDetail"
+          component={NotificationDetailScreen}
+          options={{ title: "Notification Detail" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
