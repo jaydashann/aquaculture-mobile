@@ -56,8 +56,11 @@ export default function MainScreen({ navigation }) {
   const tdsData = sensorData
     .slice(-15)
     .map((d) => ({ value: parseFloat(d.tds) }));
+  const turbidityData = sensorData
+    .slice(-15)
+    .map((d) => ({ value: parseFloat(d.tds) }));
 
-  // Header content (Chart + Aerator + Notification)
+  // header (Chart + Aerator + Notification)
   const renderHeader = () => (
     <View>
       {/* Live Chart */}
@@ -67,10 +70,12 @@ export default function MainScreen({ navigation }) {
           data={phData}
           data2={tempData}
           data3={tdsData}
+          data4={turbidityData}
           thickness={2}
           color1="#22c55e" // pH
           color2="#3b82f6" // Temperature
           color3="#facc15" // TDS
+          color4="#ff4800" // Turbidity
           curved
           animateOnDataChange
           animationDuration={600}
@@ -91,6 +96,8 @@ export default function MainScreen({ navigation }) {
           <Text style={styles.legendText}>Temp</Text>
           <View style={[styles.legendItem, { backgroundColor: "#facc15" }]} />
           <Text style={styles.legendText}>TDS</Text>
+          <View style={[styles.legendItem, { backgroundColor: "#ff4800" }]} />
+          <Text style={styles.legendText}>Turbidity</Text>
         </View>
       </View>
 
@@ -178,8 +185,6 @@ export default function MainScreen({ navigation }) {
       <TopBar
         onNotificationsPress={() => navigation.navigate("Notifications")}
         badgeCount={3}
-        showBack
-        onBackPress={() => navigation.goBack()}
       />
 
       {/* Single FlatList with header + data */}
@@ -212,6 +217,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 10,
     padding: 15,
+    overflow: 'hidden',
   },
   chartTitle: {
     color: "#a5b4fc",
@@ -256,13 +262,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
-  statusTextWrapper: { flex: 1 },
-  statusTitle: { fontSize: 18, fontWeight: "700", color: "#fff" },
-  statusSince: { fontSize: 12, color: "#cbd5e1", marginTop: 4 },
-  statusBadge: { paddingVertical: 4, paddingHorizontal: 10, borderRadius: 20 },
-  statusBadgeText: { color: "#fff", fontWeight: "600", fontSize: 12 },
-  notificationTitle: { color: "#facc15", fontWeight: "600", fontSize: 14 },
-  notificationMessage: { color: "#e2e8f0", fontSize: 12 },
+  statusTextWrapper: {
+    flex: 1
+  },
+  statusTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff"
+  },
+    statusSince: {
+    fontSize: 12,
+    color: "#cbd5e1",
+    marginTop: 4
+  },
+  statusBadge: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 20
+  },
+  statusBadgeText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 12
+  },
+  notificationTitle: {
+    color: "#facc15",
+    fontWeight: "600",
+    fontSize: 14
+  },
+  notificationMessage: {
+    color: "#e2e8f0",
+    fontSize: 12
+  },
 
   // Table
   sensorContainer: {
@@ -273,8 +304,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingTop: 15,
   },
-  sensorHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  sensorHeaderText: { color: "#a5b4fc", fontSize: 18, fontWeight: "700" },
+  sensorHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10
+  },
+  sensorHeaderText: {
+    color: "#a5b4fc",
+    fontSize: 18,
+    fontWeight: "700"
+  },
   tableHeader: {
     flexDirection: "row",
     borderBottomWidth: 1,
@@ -282,7 +321,11 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
     marginBottom: 4,
   },
-  tableHeaderCell: { color: "#cbd5e1", fontWeight: "600", fontSize: 12 },
+  tableHeaderCell: {
+    color: "#cbd5e1",
+    fontWeight: "600",
+    fontSize: 12
+  },
   tableRow: {
     flexDirection: "row",
     paddingVertical: 6,
@@ -290,5 +333,8 @@ const styles = StyleSheet.create({
     borderBottomColor: "#1e293b",
     paddingHorizontal: 20,
   },
-  tableCell: { color: "#f8fafc", fontSize: 12 },
+  tableCell: {
+    color: "#f8fafc",
+    fontSize: 12
+  },
 });

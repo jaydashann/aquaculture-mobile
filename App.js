@@ -4,6 +4,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ColorModeProvider, ColorModeContext } from "./colorMode";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { AuthProvider, useAuth } from "./auth";
+
 import WelcomeScreen from "./screens/welcomeScreen";
 import MainScreen from "./screens/mainScreen";
 import NotificationsScreen from "./screens/notificationsScreen";
@@ -13,18 +15,26 @@ const Stack = createNativeStackNavigator();
 
 function RootNav() {
   const { theme } = useContext(ColorModeContext);
+  const { user } = useAuth();
 
   return (
     <NavigationContainer theme={theme}>
-      <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade", animationDuration: 400 }}>
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="Main" component={MainScreen} />
-        <Stack.Screen name="Notifications" component={NotificationsScreen} />
-        <Stack.Screen
-          name="NotificationDetail"
-          component={NotificationDetailScreen}
-          options={{ title: "Notification Detail" }}
-        />
+      <Stack.Navigator
+        screenOptions={{ headerShown: false, animation: "fade", animationDuration: 400 }}
+      >
+        {user ? (
+          <>
+            <Stack.Screen name="Main" component={MainScreen} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} />
+            <Stack.Screen
+              name="NotificationDetail"
+              component={NotificationDetailScreen}
+              options={{ title: "Notification Detail" }}
+            />
+          </>
+        ) : (
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -34,7 +44,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ColorModeProvider>
-        <RootNav />
+        <AuthProvider>
+          <RootNav />
+        </AuthProvider>
       </ColorModeProvider>
     </SafeAreaProvider>
   );
