@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { useAuth } from "../auth";
 
-export default function WelcomeScreen() {
+export default function WelcomeScreen({ navigation }) {
   const { colors, dark } = useTheme();
   const { signIn, continueAsGuest } = useAuth();
 
@@ -26,7 +26,7 @@ export default function WelcomeScreen() {
     try {
       setBusy(true);
       await signIn(email.trim(), password);
-      // No need to navigate; App stack will switch automatically
+      // onAuthStateChanged in auth.js will switch stacks automatically
     } catch (err) {
       Alert.alert("Sign in failed", err?.message || "Please try again.");
     } finally {
@@ -34,8 +34,15 @@ export default function WelcomeScreen() {
     }
   };
 
-  const handleGuest = () => {
-    continueAsGuest();
+  const handleGuest = async () => {
+    try {
+      setBusy(true);
+      await continueAsGuest(); // uses Firebase Anonymous if enabled; otherwise stub
+    } catch (err) {
+      Alert.alert("Guest sign-in failed", err?.message || "Please try again.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -79,7 +86,19 @@ export default function WelcomeScreen() {
             <Text style={styles.primaryText}>{busy ? "Signing in..." : "Sign In"}</Text>
           </TouchableOpacity>
 
+          {/* Create account */}
           <TouchableOpacity
+            style={[styles.ghostBtn, { borderColor: colors.border, marginTop: 10 }]}
+            onPress={() => navigation.navigate("SignUp")}
+            activeOpacity={0.9}
+          >
+            <Ionicons name="person-add-outline" size={18} color={colors.text} style={{ marginRight: 6 }} />
+            <Text style={[styles.ghostText, { color: colors.text }]}>Create account</Text>
+          </TouchableOpacity>
+
+          {/* Continue as Guest */}
+          <TouchableOpacity
+            disabled={busy}
             style={[styles.ghostBtn, { borderColor: colors.border }]}
             onPress={handleGuest}
             activeOpacity={0.9}

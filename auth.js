@@ -1,39 +1,64 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { auth } from "./firebase";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signOut as fbSignOut,
+  signInAnonymously,
+} from "firebase/auth";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // null = signed out
+  const [user, setUser] = useState(null);           // null = signed out
+  const [booting, setBooting] = useState(true);     // optional: splash/loader gating
 
-  // ---- Stubbed methods you can replace with Firebase later ----
-  const signIn = async (email, password) => {
-    // TODO: replace with Firebase signInWithEmailAndPassword
-    if (!email || !password) throw new Error("Email and password are required.");
-    setUser({
-      uid: "local-" + Date.now(),
-      email,
-      displayName: email.split("@")[0],
-      isGuest: false,
+  // Keep app in sync with Firebase session
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (fbUser) => {
+      if (fbUser) {
+        setUser({
+          uid: fbUser.uid,
+          email: fbUser.email,
+          displayName: fbUser.displayName || fbUser.email?.split("@")[0] || "User",
+          isGuest: fbUser.isAnonymous || false,
+        });
+      } else {
+        setUser(null);
+      }
+      setBooting(false);
     });
+    return () => unsub();
+  }, []);
+
+  const signIn = async (email, password) => {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    return cred.user;
   };
 
-  const continueAsGuest = () => {
-    setUser({
-      uid: "guest",
-      displayName: "Guest",
-      email: null,
-      isGuest: true,
-    });
+  const signUp = async (email, password, displayName) => {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    if (displayName) {
+      await updateProfile(cred.user, { displayName });
+    }
+    return cred.user;
+  };
+
+  const continueAsGuest = async () => {
+    // Enable Anonymous in Firebase Console to use this
+    const cred = await signInAnonymously(auth);
+    return cred.user;
   };
 
   const signOut = async () => {
-    // TODO: replace with Firebase signOut
-    setUser(null);
+    await fbSignOut(auth);
   };
 
   const value = useMemo(
-    () => ({ user, signIn, continueAsGuest, signOut }),
-    [user]
+    () => ({ user, booting, signIn, signUp, continueAsGuest, signOut }),
+    [user, booting]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

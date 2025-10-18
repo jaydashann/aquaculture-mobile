@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
   Text,
   TouchableOpacity,
   FlatList,
+  Platform,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -14,6 +15,7 @@ import TopBar from "../components/TopBar";
 export default function MainScreen({ navigation }) {
   const { colors } = useTheme();
   const [sensorData, setSensorData] = useState([]);
+  const [scaleMode, setScaleMode] = useState("raw"); // 'raw' | 'norm'
 
   const aeratorStatus = {
     isActive: true,
@@ -29,10 +31,10 @@ export default function MainScreen({ navigation }) {
   // Random sensor generator
   const generateRandomData = () => ({
     id: Math.random().toString(36).substring(7),
-    ph: (7.5 + Math.random() * 1.0).toFixed(1),
-    temp: (25 + Math.random() * 3).toFixed(1),
-    turbidity: (0.5 + Math.random() * 2).toFixed(1),
-    tds: (1000 + Math.random() * 400).toFixed(0),
+    ph: (7.5 + Math.random() * 1.0).toFixed(1), // ~7.5–8.5
+    temp: (25 + Math.random() * 3).toFixed(1), // ~25–28 °C
+    turbidity: (0.5 + Math.random() * 2).toFixed(1), // ~0.5–2.5 NTU
+    tds: (1000 + Math.random() * 400).toFixed(0), // ~1000–1400 ppm
     time: new Date().toLocaleTimeString(),
   });
 
@@ -42,36 +44,111 @@ export default function MainScreen({ navigation }) {
     setSensorData(initialData);
 
     const interval = setInterval(() => {
-      setSensorData((prev) => [...prev, generateRandomData()]);
+      setSensorData((prev) => [...prev.slice(-99), generateRandomData()]);
     }, 2000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Prepare chart data
-  const phData = sensorData.slice(-15).map((d) => ({ value: parseFloat(d.ph) }));
-  const tempData = sensorData
-    .slice(-15)
-    .map((d) => ({ value: parseFloat(d.temp) }));
-  const tdsData = sensorData
-    .slice(-15)
-    .map((d) => ({ value: parseFloat(d.tds) }));
-  const turbidityData = sensorData
-    .slice(-15)
-    .map((d) => ({ value: parseFloat(d.tds) }));
+  // ---- Prepare chart data (last 15 points) ----
+  const last = sensorData.slice(-15);
+
+  const phVals = last.map((d) => +d.ph);
+  const tempVals = last.map((d) => +d.temp);
+  const tdsVals = last.map((d) => +d.tds);
+  const turbVals = last.map((d) => +d.turbidity);
+
+  const phData = phVals.map((v) => ({ value: v }));
+  const tempData = tempVals.map((v) => ({ value: v }));
+  const tdsData = tdsVals.map((v) => ({ value: v }));
+  const turbidityData = turbVals.map((v) => ({ value: v }));
+
+  // Global max so all 4 series render on the same Y-axis
+  const globalMaxRaw = Math.max(
+    ...(phVals.length ? phVals : [0]),
+    ...(tempVals.length ? tempVals : [0]),
+    ...(tdsVals.length ? tdsVals : [0]),
+    ...(turbVals.length ? turbVals : [0])
+  );
+  const maxValueRaw = Math.ceil(globalMaxRaw * 1.05);
+
+  // Normalized view (0–100) for readability
+  const normalize = (arr) => {
+    if (!arr.length) return [];
+    const min = Math.min(...arr);
+    const max = Math.max(...arr);
+    const range = max - min || 1; // avoid division by zero
+    return arr.map((v) => ({ value: ((v - min) / range) * 100 }));
+  };
+
+  const phDataNorm = normalize(phVals);
+  const tempDataNorm = normalize(tempVals);
+  const tdsDataNorm = normalize(tdsVals);
+  const turbidityDataNorm = normalize(turbVals);
+
+  const usingNorm = scaleMode === "norm";
+  const displayData1 = usingNorm ? phDataNorm : phData;
+  const displayData2 = usingNorm ? tempDataNorm : tempData;
+  const displayData3 = usingNorm ? tdsDataNorm : tdsData;
+  const displayData4 = usingNorm ? turbidityDataNorm : turbidityData;
+  const maxValue = usingNorm ? 100 : maxValueRaw;
 
   // header (Chart + Aerator + Notification)
   const renderHeader = () => (
     <View>
       {/* Live Chart */}
       <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>Trends and Patterns</Text>
+        <View style={styles.chartHeaderRow}>
+          <Text style={styles.chartTitle}>Trends and Patterns</Text>
+
+          <View style={styles.toggleGroup}>
+            <TouchableOpacity
+              onPress={() => setScaleMode("raw")}
+              style={[
+                styles.toggleBtn,
+                scaleMode === "raw" && styles.toggleBtnActive,
+              ]}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.toggleText,
+                  scaleMode === "raw" && styles.toggleTextActive,
+                ]}
+              >
+                Raw
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setScaleMode("norm")}
+              style={[
+                styles.toggleBtn,
+                scaleMode === "norm" && styles.toggleBtnActive,
+              ]}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.toggleText,
+                  scaleMode === "norm" && styles.toggleTextActive,
+                ]}
+              >
+                Normalized
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <LineChart
-          data={phData}
-          data2={tempData}
-          data3={tdsData}
-          data4={turbidityData}
+          data={displayData1}
+          data2={displayData2}
+          data3={displayData3}
+          data4={displayData4}
+          maxValue={maxValue}
           thickness={2}
+          thickness2={2}
+          thickness3={2}
+          thickness4={2}
           color1="#22c55e" // pH
           color2="#3b82f6" // Temperature
           color3="#facc15" // TDS
@@ -81,24 +158,31 @@ export default function MainScreen({ navigation }) {
           animationDuration={600}
           hideRules
           hideYAxisText
-          height={180}
+          height={200}
           backgroundColor="#0f172a"
           xAxisColor="#1e293b"
           yAxisColor="#1e293b"
           startOpacity={0.9}
           endOpacity={0.1}
-          areaChart
         />
+
         <View style={styles.chartLegend}>
-          <View style={[styles.legendItem, { backgroundColor: "#22c55e" }]} />
+          <View style={[styles.legendDot, { backgroundColor: "#22c55e" }]} />
           <Text style={styles.legendText}>pH</Text>
-          <View style={[styles.legendItem, { backgroundColor: "#3b82f6" }]} />
+          <View style={[styles.legendDot, { backgroundColor: "#3b82f6" }]} />
           <Text style={styles.legendText}>Temp</Text>
-          <View style={[styles.legendItem, { backgroundColor: "#facc15" }]} />
+          <View style={[styles.legendDot, { backgroundColor: "#facc15" }]} />
           <Text style={styles.legendText}>TDS</Text>
-          <View style={[styles.legendItem, { backgroundColor: "#ff4800" }]} />
+          <View style={[styles.legendDot, { backgroundColor: "#ff4800" }]} />
           <Text style={styles.legendText}>Turbidity</Text>
         </View>
+
+        {usingNorm ? (
+          <Text style={styles.noteText}>
+            Showing normalized values (0–100) to compare trends. Raw values are
+            still listed in the table below.
+          </Text>
+        ) : null}
       </View>
 
       {/* Aerator Status */}
@@ -170,11 +254,11 @@ export default function MainScreen({ navigation }) {
         </View>
 
         <View style={styles.tableHeader}>
-          <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Time</Text>
-          <Text style={[styles.tableHeaderCell, { flex: 1 }]}>pH</Text>
-          <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Temp (°C)</Text>
-          <Text style={[styles.tableHeaderCell, { flex: 1 }]}>Turbidity</Text>
-          <Text style={[styles.tableHeaderCell, { flex: 1.8 }]}>TDS</Text>
+          <Text style={[styles.th, styles.colTime]}>Time</Text>
+          <Text style={[styles.thNum, styles.colPh]}>pH</Text>
+          <Text style={[styles.thNum, styles.colTemp]}>Temp (°C)</Text>
+          <Text style={[styles.thNum, styles.colTurb]}>Turbidity</Text>
+          <Text style={[styles.thNum, styles.colTds]}>TDS</Text>
         </View>
       </View>
     </View>
@@ -190,15 +274,27 @@ export default function MainScreen({ navigation }) {
       {/* Single FlatList with header + data */}
       <FlatList
         ListHeaderComponent={renderHeader}
+        ListHeaderComponentStyle={{ paddingBottom: 0 }}
+        contentContainerStyle={{ paddingBottom: 24 }}
         data={sensorData}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.tableRow}>
-            <Text style={[styles.tableCell, { flex: 1 }]}>{item.time}</Text>
-            <Text style={[styles.tableCell, { flex: 1 }]}>{item.ph}</Text>
-            <Text style={[styles.tableCell, { flex: 1 }]}>{item.temp}</Text>
-            <Text style={[styles.tableCell, { flex: 1 }]}>{item.turbidity}</Text>
-            <Text style={[styles.tableCell, { flex: 1.8 }]}>{item.tds}</Text>
+        renderItem={({ item, index }) => (
+          <View
+            style={[
+              styles.tableRow,
+              index % 2 === 0 && styles.zebraRow, // zebra
+            ]}
+          >
+            <Text
+              numberOfLines={1}
+              style={[styles.td, styles.colTime]}
+            >
+              {item.time}
+            </Text>
+            <Text style={[styles.tdNum, styles.colPh]}>{item.ph}</Text>
+            <Text style={[styles.tdNum, styles.colTemp]}>{item.temp}</Text>
+            <Text style={[styles.tdNum, styles.colTurb]}>{item.turbidity}</Text>
+            <Text style={[styles.tdNum, styles.colTds]}>{item.tds}</Text>
           </View>
         )}
       />
@@ -217,20 +313,47 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 10,
     padding: 15,
-    overflow: 'hidden',
+    overflow: "hidden",
+  },
+  chartHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   chartTitle: {
     color: "#a5b4fc",
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 10,
+    flex: 1,
+  },
+  toggleGroup: {
+    flexDirection: "row",
+    backgroundColor: "#0b1224",
+    borderRadius: 8,
+    overflow: "hidden",
+    marginBottom: 10,
+  },
+  toggleBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  toggleBtnActive: {
+    backgroundColor: "#1f2b4a",
+  },
+  toggleText: {
+    color: "#94a3b8",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  toggleTextActive: {
+    color: "#e2e8f0",
   },
   chartLegend: {
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 8,
   },
-  legendItem: {
+  legendDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
@@ -240,6 +363,12 @@ const styles = StyleSheet.create({
     color: "#cbd5e1",
     fontSize: 12,
     marginHorizontal: 4,
+  },
+  noteText: {
+    color: "#94a3b8",
+    fontSize: 12,
+    marginTop: 6,
+    textAlign: "center",
   },
 
   // Status cards
@@ -263,78 +392,108 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   statusTextWrapper: {
-    flex: 1
+    flex: 1,
   },
   statusTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#fff"
+    color: "#fff",
   },
-    statusSince: {
+  statusSince: {
     fontSize: 12,
     color: "#cbd5e1",
-    marginTop: 4
+    marginTop: 4,
   },
   statusBadge: {
     paddingVertical: 4,
     paddingHorizontal: 10,
-    borderRadius: 20
+    borderRadius: 20,
   },
   statusBadgeText: {
     color: "#fff",
     fontWeight: "600",
-    fontSize: 12
+    fontSize: 12,
   },
   notificationTitle: {
     color: "#facc15",
     fontWeight: "600",
-    fontSize: 14
+    fontSize: 14,
   },
   notificationMessage: {
     color: "#e2e8f0",
-    fontSize: 12
+    fontSize: 12,
   },
 
-  // Table
+  // Table container + header
   sensorContainer: {
-    backgroundColor: "#0f172a",
-    borderRadius: 12,
     marginHorizontal: 20,
     marginBottom: 0,
-    paddingHorizontal: 15,
     paddingTop: 15,
+    paddingBottom: 6,
   },
   sensorHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10
+    marginBottom: 10,
   },
   sensorHeaderText: {
     color: "#a5b4fc",
     fontSize: 18,
-    fontWeight: "700"
+    fontWeight: "700",
   },
   tableHeader: {
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: "#334155",
     paddingBottom: 6,
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  tableHeaderCell: {
+
+  // Column widths (shared by header + rows)
+  colTime: { flex: 1.5 },
+  colPh: { flex: 0.8 },
+  colTemp: { flex: 1.0 },
+  colTurb: { flex: 1.0 },
+  colTds: { flex: 1.1 },
+
+  // Header cells
+  th: {
     color: "#cbd5e1",
-    fontWeight: "600",
-    fontSize: 12
+    fontWeight: "700",
+    fontSize: 12,
   },
+  thNum: {
+    color: "#cbd5e1",
+    fontWeight: "700",
+    fontSize: 12,
+    textAlign: "right",
+  },
+
+  // Rows
   tableRow: {
     flexDirection: "row",
-    paddingVertical: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 20, // match header container
     borderBottomWidth: 0.5,
     borderBottomColor: "#1e293b",
-    paddingHorizontal: 20,
   },
-  tableCell: {
+  zebraRow: {
+    backgroundColor: "#0b1224",
+  },
+
+  // Cells
+  td: {
     color: "#f8fafc",
-    fontSize: 12
+    fontSize: 12,
+    includeFontPadding: false,
+  },
+  tdNum: {
+    color: "#f8fafc",
+    fontSize: 12,
+    textAlign: "right",
+    includeFontPadding: false,
+    // monospaced digits for better column alignment
+    fontVariant: ["tabular-nums"], // iOS
+    fontFamily: Platform.OS === "android" ? "monospace" : undefined, // Android
   },
 });

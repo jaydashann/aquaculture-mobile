@@ -38,16 +38,6 @@ export default function TopBar({ onNotificationsPress, onBackPress, showBack = f
 
         {/* Right icons */}
         <View style={styles.right}>
-          <TouchableOpacity
-            onPress={toggleColorMode}
-            style={[styles.iconBtn, { backgroundColor: colors.background }]}
-          >
-            <Ionicons
-              name={mode === "dark" ? "moon" : "sunny-outline"}
-              size={22}
-              color={colors.text}
-            />
-          </TouchableOpacity>
 
           <TouchableOpacity
             onPress={onNotificationsPress}
