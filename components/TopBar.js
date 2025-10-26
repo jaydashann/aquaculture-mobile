@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ColorModeContext } from "../colorMode";
 import { useAuth } from "../auth";
 
-export default function TopBar({ onNotificationsPress, onBackPress, showBack = false }) {
+export default function TopBar({ onNotificationsPress, onBackPress, showBack = false, badgeCount = 0 }) {
   const { colors, tokens } = useTheme();
   const { mode, toggleColorMode } = useContext(ColorModeContext);
   const { user, signOut } = useAuth();
@@ -38,12 +38,18 @@ export default function TopBar({ onNotificationsPress, onBackPress, showBack = f
 
         {/* Right icons */}
         <View style={styles.right}>
-
           <TouchableOpacity
             onPress={onNotificationsPress}
             style={[styles.iconBtn, { backgroundColor: colors.background }]}
           >
             <Ionicons name="notifications-outline" size={22} color={colors.text} />
+
+            {/* Badge for notifications */}
+            {badgeCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{badgeCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
 
           {/* Profile button */}
@@ -112,6 +118,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
     shadowOffset: { width: 0, height: 1 },
+  },
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    backgroundColor: "#FF3B30", // Red background
+    borderRadius: 10,
+    width: 18,
+    height: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "bold",
   },
 
   // Menu
