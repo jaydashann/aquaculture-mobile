@@ -6,41 +6,92 @@ import styles from "../styles/MainScreenStyles";
 export default function ChartSection({ sensorData, scaleMode, setScaleMode }) {
   const last = sensorData.slice(-15);
 
-  // Extract data arrays
+  // --- 1️⃣ Extract Date + Time Labels ---
+  const timeLabels = last.map((d) => {
+    const ts = d.rawTimestamp || Date.now();
+    const date = new Date(ts);
+
+    const dateStr = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+
+    const timeStr = date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    return `${dateStr}\n${timeStr}`; // Multi-line x-axis label
+  });
+
+  // --- Extract Values ---
   const phVals = last.map((d) => +d.ph || 0);
   const tempVals = last.map((d) => +d.temp || 0);
   const tdsVals = last.map((d) => +d.tds || 0);
   const turbVals = last.map((d) => +d.turbidity || 0);
 
-  const normalize = (arr) => {
+  // --- 2️⃣ Chart Data With Labels ---
+  const phData = last.map((d, i) => ({
+    value: parseFloat(d.ph),
+    label: timeLabels[i],
+  }));
+
+  const tempData = last.map((d, i) => ({
+    value: parseFloat(d.temp),
+    label: timeLabels[i],
+  }));
+
+  const tdsData = last.map((d, i) => ({
+    value: parseFloat(d.tds),
+    label: timeLabels[i],
+  }));
+
+  const turbData = last.map((d, i) => ({
+    value: parseFloat(d.turbidity),
+    label: timeLabels[i],
+  }));
+
+  // --- 3️⃣ Normalization Function (keep labels) ---
+  const normalize = (arr, labels) => {
     if (!arr.length) return [];
     const min = Math.min(...arr);
     const max = Math.max(...arr);
     const range = max - min || 1;
-    return arr.map((v) => ({ value: ((v - min) / range) * 100 }));
+    return arr.map((v, i) => ({
+      value: ((v - min) / range) * 100,
+      label: labels[i],
+    }));
   };
 
-  const phData = phVals.map((v) => ({ value: v }));
-  const tempData = tempVals.map((v) => ({ value: v }));
-  const tdsData = tdsVals.map((v) => ({ value: v }));
-  const turbData = turbVals.map((v) => ({ value: v }));
-
   const usingNorm = scaleMode === "norm";
-  const maxRaw = Math.ceil(Math.max(...phVals, ...tempVals, ...tdsVals, ...turbVals, 0) * 1.05);
+
+  const maxRaw = Math.ceil(
+    Math.max(...phVals, ...tempVals, ...tdsVals, ...turbVals, 0) * 1.05
+  );
+
   const maxValue = usingNorm ? 100 : maxRaw;
 
   return (
     <View style={styles.chartContainer}>
       <View style={styles.chartHeaderRow}>
-        <Text style={styles.chartTitle}>Trends and Patterns</Text>
+        <Text style={styles.chartTitle}>Forecasted Data</Text>
+
         <View style={styles.toggleGroup}>
           {["raw", "norm"].map((m) => (
             <TouchableOpacity
               key={m}
               onPress={() => setScaleMode(m)}
-              style={[styles.toggleBtn, scaleMode === m && styles.toggleBtnActive]}
+              style={[
+                styles.toggleBtn,
+                scaleMode === m && styles.toggleBtnActive,
+              ]}
             >
-              <Text style={[styles.toggleText, scaleMode === m && styles.toggleTextActive]}>
+              <Text
+                style={[
+                  styles.toggleText,
+                  scaleMode === m && styles.toggleTextActive,
+                ]}
+              >
                 {m === "raw" ? "Raw" : "Normalized"}
               </Text>
             </TouchableOpacity>
@@ -48,23 +99,32 @@ export default function ChartSection({ sensorData, scaleMode, setScaleMode }) {
         </View>
       </View>
 
+      {/* --- 4️⃣ Line Chart with X-Axis Date + Time Labels --- */}
       <LineChart
-        data={usingNorm ? normalize(phVals) : phData}
-        data2={usingNorm ? normalize(tempVals) : tempData}
-        data3={usingNorm ? normalize(tdsVals) : tdsData}
-        data4={usingNorm ? normalize(turbVals) : turbData}
+        data={usingNorm ? normalize(phVals, timeLabels) : phData}
+        data2={usingNorm ? normalize(tempVals, timeLabels) : tempData}
+        data3={usingNorm ? normalize(tdsVals, timeLabels) : tdsData}
+        data4={usingNorm ? normalize(turbVals, timeLabels) : turbData}
+        curved
+        hideRules
+        hideYAxisText
+        height={250}
+        maxValue={maxValue}
+        backgroundColor="#0f172a"
+        spacing={50}
+        xAxisLabelStyle={{
+          color: "#94a3b8",
+          fontSize: 10,
+          textAlign: "center",
+        }}
+        showXAxisIndices
         color1="#22c55e"
         color2="#3b82f6"
         color3="#facc15"
         color4="#ff4800"
-        curved
-        hideRules
-        hideYAxisText
-        height={200}
-        backgroundColor="#0f172a"
-        maxValue={maxValue}
       />
 
+      {/* --- Legend --- */}
       <View style={styles.chartLegend}>
         {[
           { color: "#22c55e", label: "pH" },
@@ -72,8 +132,13 @@ export default function ChartSection({ sensorData, scaleMode, setScaleMode }) {
           { color: "#facc15", label: "TDS" },
           { color: "#ff4800", label: "Turbidity" },
         ].map((l) => (
-          <View key={l.label} style={{ flexDirection: "row", alignItems: "center" }}>
-            <View style={[styles.legendDot, { backgroundColor: l.color }]} />
+          <View
+            key={l.label}
+            style={{ flexDirection: "row", alignItems: "center" }}
+          >
+            <View
+              style={[styles.legendDot, { backgroundColor: l.color }]}
+            />
             <Text style={styles.legendText}>{l.label}</Text>
           </View>
         ))}

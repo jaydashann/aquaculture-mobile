@@ -22,7 +22,7 @@ export default function MainScreen({ navigation }) {
   // --- Fetch Notifications from Flask backend ---
   const fetchNotifications = async () => {
     try {
-      const response = await fetch("http://192.168.254.185:5000/notifications");
+      const response = await fetch("http://192.168.100.7:5000/notifications");
       const data = await response.json();
       setNotifications(data);
     } catch (error) {
@@ -33,7 +33,7 @@ export default function MainScreen({ navigation }) {
   // --- Fetch Aerator Status from API ---
   const fetchAeratorStatus = async () => {
     try {
-      const response = await fetch("http://192.168.254.185:5000/aerator-status");
+      const response = await fetch("http://192.168.100.7:5000/aerator-status");
       const data = await response.json();
       setAeratorStatus(data);
     } catch (error) {
@@ -44,7 +44,7 @@ export default function MainScreen({ navigation }) {
   const toggleAerator = async () => {
     try {
       const newStatus = aeratorStatus.isActive ? "OFF" : "ON";  // Toggle the current state to "ON" or "OFF"
-      const response = await fetch("http://192.168.254.185:5000/aerator-status", {
+      const response = await fetch("http://192.168.100.7:5000/aerator-status", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,10 +80,10 @@ export default function MainScreen({ navigation }) {
 
   // Data for FlatList rendering
   const renderItems = [
-    {
-      type: "debug",
-      content: <DebugInfo data={sensorData} />,
-    },
+//    {
+//      type: "debug",
+//      content: <DebugInfo data={sensorData} />,
+//    },
     {
       type: "modeSwitch",
       content: (
@@ -91,11 +91,19 @@ export default function MainScreen({ navigation }) {
           <Text style={styles.modeLabel}>
             {mode === "firebase"
               ? "☁️ Firebase Cloud Mode"
-              : "📡 Local Flask Mode"}
+              : mode === "local"
+              ? "📡 Local Flask Mode"
+              : "🎨 Demo Mode"}
           </Text>
+
+          {/* Cycle through the 3 modes */}
           <Switch
-            value={mode === "local"}
-            onValueChange={(v) => setMode(v ? "local" : "firebase")}
+            value={mode !== "firebase"}
+            onValueChange={() => {
+              if (mode === "firebase") setMode("local");
+              else if (mode === "local") setMode("demo");
+              else setMode("firebase");
+            }}
           />
         </View>
       ),

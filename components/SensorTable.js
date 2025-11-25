@@ -8,7 +8,7 @@ export default function SensorTable({ sensorData = [] }) {
     <View style={styles.sensorContainer}>
       <View style={styles.sensorHeader}>
         <MaterialCommunityIcons name="eye" size={20} color="#a5b4fc" style={{ marginRight: 6 }} />
-        <Text style={styles.sensorHeaderText}>Sensors (Live Stream)</Text>
+        <Text style={styles.sensorHeaderText}>Live Data Stream</Text>
       </View>
 
       <View style={styles.tableHeader}>

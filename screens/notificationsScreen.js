@@ -11,7 +11,7 @@ export default function NotificationsScreen({ navigation }) {
   // Fetch notifications from backend
   const fetchNotifications = async () => {
     try {
-      const response = await fetch("http://192.168.254.185:5000/notifications");
+      const response = await fetch("http://192.168.100.7:5000/notifications");
       const data = await response.json();
       setNotifications(data);
     } catch (error) {
@@ -22,7 +22,7 @@ export default function NotificationsScreen({ navigation }) {
   // Delete a specific notification
   const deleteNotification = async (id) => {
     try {
-      const response = await fetch(`http://192.168.254.185:5000/notifications/${id}`, {
+      const response = await fetch(`http://192.168.100.7:5000/notifications/${id}`, {
         method: "DELETE",
       });
       if (response.ok) {

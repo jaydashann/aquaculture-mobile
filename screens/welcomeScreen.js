@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Image } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
@@ -51,7 +52,10 @@ export default function WelcomeScreen({ navigation }) {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.overlay}>
-        <Text style={[styles.title, { color: colors.text }]}>Welcome!</Text>
+        <Image
+          source={require("../assets/kelong1.png")}   // ← your logo path
+          style={styles.logo}
+        />
         <Text style={[styles.subtitle, { color: colors.text }]}>
           Sign in or continue as a guest
         </Text>
@@ -165,5 +169,13 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowOffset: { width: 2, height: 2 },
+  },
+  logo: {
+    width: 350,
+    height: 350,
+    resizeMode: "contain",
+    alignSelf: "center",
+    marginBottom: -110,     // ⬅ less space below the logo
+    marginTop: -20,      // ⬅ pull the logo upward
   },
 });
