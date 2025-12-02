@@ -15,11 +15,11 @@ export default function MainScreen({ navigation }) {
   const [scaleMode, setScaleMode] = useState("raw");
   const [notifications, setNotifications] = useState([]);
   const [aeratorStatus, setAeratorStatus] = useState({
-    isActive: false, // Start with OFF as per your initial state
+    isActive: false, // off as initial state
     lastUpdated: "10/11/2025, 7:49:41 PM",
   });
 
-  // --- Fetch Notifications from Flask backend ---
+  // fetch notification from flask backend
   const fetchNotifications = async () => {
     try {
       const response = await fetch("http://192.168.100.7:5000/notifications");
@@ -30,7 +30,7 @@ export default function MainScreen({ navigation }) {
     }
   };
 
-  // --- Fetch Aerator Status from API ---
+  // fetch aerator status
   const fetchAeratorStatus = async () => {
     try {
       const response = await fetch("http://192.168.100.7:5000/aerator-status");
@@ -43,18 +43,18 @@ export default function MainScreen({ navigation }) {
 
   const toggleAerator = async () => {
     try {
-      const newStatus = aeratorStatus.isActive ? "OFF" : "ON";  // Toggle the current state to "ON" or "OFF"
+      const newStatus = aeratorStatus.isActive ? "OFF" : "ON";  // toggle to on and off
       const response = await fetch("http://192.168.100.7:5000/aerator-status", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status: newStatus }), // Send "status" instead of "isActive"
+        body: JSON.stringify({ status: newStatus }), // send "status" instead of "isActive"
       });
       const data = await response.json();
       if (data.status === "success") {
         setAeratorStatus({
-          isActive: newStatus === "ON",  // Update the active state based on the new status
+          isActive: newStatus === "ON",  // update the active state based on the new status
           lastUpdated: data.lastUpdated,
         });
       }
@@ -67,7 +67,7 @@ export default function MainScreen({ navigation }) {
     fetchNotifications();
     fetchAeratorStatus();
 
-    // Auto-refresh aerator status every 5 seconds
+    // auto-refresh aerator status every 5 seconds
     const interval = setInterval(() => {
       fetchNotifications();
       fetchAeratorStatus();
@@ -78,7 +78,7 @@ export default function MainScreen({ navigation }) {
 
   const { sensorData, forecastData } = useSensorData(mode);
 
-  // Data for FlatList rendering
+  // data for FlatList rendering
   const renderItems = [
 //    {
 //      type: "debug",
@@ -96,7 +96,7 @@ export default function MainScreen({ navigation }) {
               : "🎨 Demo Mode"}
           </Text>
 
-          {/* Cycle through the 3 modes */}
+          {/* cycle through the 3 modes */}
           <Switch
             value={mode !== "firebase"}
             onValueChange={() => {
@@ -127,7 +127,7 @@ export default function MainScreen({ navigation }) {
           subtitle={`Since ${aeratorStatus.lastUpdated}`}
           icon="autorenew"
           active={aeratorStatus.isActive}
-          onPress={toggleAerator}  // Add the onPress handler to toggle the aerator
+          onPress={toggleAerator}
         />
       ),
     },
@@ -151,12 +151,11 @@ export default function MainScreen({ navigation }) {
 
   return (
     <View style={[styles.background, { backgroundColor: colors.background }]}>
-      {/* --- Top Bar --- */}
+      {/* --- top bar --- */}
       <TopBar
         onNotificationsPress={() => navigation.navigate("Notifications")}
         badgeCount={notifications.length}
       />
-      {/* --- FlatList for scrollable content --- */}
       <FlatList
         data={renderItems}
         keyExtractor={(item, index) => index.toString()}

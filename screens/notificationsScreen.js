@@ -8,7 +8,7 @@ export default function NotificationsScreen({ navigation }) {
   const { colors } = useTheme();
   const [notifications, setNotifications] = useState([]);
 
-  // Fetch notifications from backend
+  // fetch notifications from backend
   const fetchNotifications = async () => {
     try {
       const response = await fetch("http://192.168.100.7:5000/notifications");
@@ -19,7 +19,7 @@ export default function NotificationsScreen({ navigation }) {
     }
   };
 
-  // Delete a specific notification
+  // delete notification
   const deleteNotification = async (id) => {
     try {
       const response = await fetch(`http://192.168.100.7:5000/notifications/${id}`, {
@@ -37,7 +37,7 @@ export default function NotificationsScreen({ navigation }) {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      fetchNotifications(); // Refresh when user goes back
+      fetchNotifications(); // refresh when user goes back
     });
     return unsubscribe;
   }, [navigation]);
@@ -46,7 +46,7 @@ export default function NotificationsScreen({ navigation }) {
     navigation.navigate("NotificationDetail", { notification: item });
   };
 
-  // Render each notification card
+  // render each notification card
   const renderItem = ({ item }) => (
     <View
       style={[

@@ -6,7 +6,7 @@ import styles from "../styles/MainScreenStyles";
 export default function ChartSection({ sensorData, scaleMode, setScaleMode }) {
   const last = sensorData.slice(-15);
 
-  // --- 1️⃣ Extract Date + Time Labels ---
+  // extract date and time labels
   const timeLabels = last.map((d) => {
     const ts = d.rawTimestamp || Date.now();
     const date = new Date(ts);
@@ -21,16 +21,16 @@ export default function ChartSection({ sensorData, scaleMode, setScaleMode }) {
       minute: "2-digit",
     });
 
-    return `${dateStr}\n${timeStr}`; // Multi-line x-axis label
+    return `${dateStr}\n${timeStr}`; // multi-line x-axis label
   });
 
-  // --- Extract Values ---
+  // extract values
   const phVals = last.map((d) => +d.ph || 0);
   const tempVals = last.map((d) => +d.temp || 0);
   const tdsVals = last.map((d) => +d.tds || 0);
   const turbVals = last.map((d) => +d.turbidity || 0);
 
-  // --- 2️⃣ Chart Data With Labels ---
+  // chart data w/ labels
   const phData = last.map((d, i) => ({
     value: parseFloat(d.ph),
     label: timeLabels[i],
@@ -51,7 +51,7 @@ export default function ChartSection({ sensorData, scaleMode, setScaleMode }) {
     label: timeLabels[i],
   }));
 
-  // --- 3️⃣ Normalization Function (keep labels) ---
+  // normalization function
   const normalize = (arr, labels) => {
     if (!arr.length) return [];
     const min = Math.min(...arr);
@@ -99,7 +99,7 @@ export default function ChartSection({ sensorData, scaleMode, setScaleMode }) {
         </View>
       </View>
 
-      {/* --- 4️⃣ Line Chart with X-Axis Date + Time Labels --- */}
+      {/* line chart with data time labels */}
       <LineChart
         data={usingNorm ? normalize(phVals, timeLabels) : phData}
         data2={usingNorm ? normalize(tempVals, timeLabels) : tempData}
@@ -124,7 +124,7 @@ export default function ChartSection({ sensorData, scaleMode, setScaleMode }) {
         color4="#ff4800"
       />
 
-      {/* --- Legend --- */}
+      {/* legends */}
       <View style={styles.chartLegend}>
         {[
           { color: "#22c55e", label: "pH" },

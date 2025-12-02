@@ -6,10 +6,8 @@ export const makeNavTheme = (mode = "dark") => {
   const base = mode === "dark" ? DarkTheme : DefaultTheme;
 
   return {
-    // start from React Navigation's base theme (this includes required shapes)
     ...base,
 
-    // required by @react-navigation/elements header/title, etc.
     fonts: {
       regular: { fontFamily: "System", fontWeight: "400" },
       medium:  { fontFamily: "System", fontWeight: "500" },
@@ -17,7 +15,6 @@ export const makeNavTheme = (mode = "dark") => {
       heavy:   { fontFamily: "System", fontWeight: "800" }, // safe extra
     },
 
-    // your colors, layered over the base
     colors: {
       ...base.colors,
       background: mode === "dark" ? t.primary[500] : "#fcfcfc",
@@ -28,7 +25,6 @@ export const makeNavTheme = (mode = "dark") => {
       notification: t.redAccent[500],
     },
 
-    // custom extras (ok to keep — JS will allow them)
     tokens: t,
     typography: {
       baseSize: 12,

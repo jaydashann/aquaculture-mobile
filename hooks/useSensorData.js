@@ -8,9 +8,7 @@ export default function useSensorData(mode = "firebase") {
 
   const LOCAL_BASE = "http://192.168.100.7:5000";
 
-  //---------------------------------------
-  // 🔥 DEMO MODE: Random data generator
-  //---------------------------------------
+  // demo mode: random data generator
   const generateRandomData = () => {
     return {
       id: Date.now().toString(),
@@ -23,9 +21,7 @@ export default function useSensorData(mode = "firebase") {
     };
   };
 
-  //---------------------------------------
-  // 🔥 Local Flask Fetch: Sensor
-  //---------------------------------------
+  // local flask mode
   const fetchLocalData = async () => {
     try {
       const res = await fetch(`${LOCAL_BASE}/latest`);
@@ -48,9 +44,7 @@ export default function useSensorData(mode = "firebase") {
     } catch (err) {}
   };
 
-  //---------------------------------------
-  // 🔥 Local Flask Fetch: Forecast
-  //---------------------------------------
+  // local flask forecast
   const fetchForecast = async () => {
     try {
       const res = await fetch(`${LOCAL_BASE}/forecast`);
@@ -71,15 +65,11 @@ export default function useSensorData(mode = "firebase") {
     } catch (err) {}
   };
 
-  //---------------------------------------
-  // 🔥 MAIN MODE HANDLER
-  //---------------------------------------
+  // main mode handler
   useEffect(() => {
     let interval;
 
-    //--------------------------------------------------
-    // 📡 DEMO MODE — generate random data every 3 sec
-    //--------------------------------------------------
+    // demo mode generate random data every 3 sec
     if (mode === "demo") {
       console.log("🎨 DEMO MODE ACTIVATED");
       interval = setInterval(() => {
@@ -88,9 +78,7 @@ export default function useSensorData(mode = "firebase") {
       return () => clearInterval(interval);
     }
 
-    //--------------------------------------------------
-    // 🌩 FIREBASE MODE
-    //--------------------------------------------------
+    // firebase mode
     if (mode === "firebase") {
       console.log("🔥 Firebase Mode Enabled");
 
@@ -126,9 +114,7 @@ export default function useSensorData(mode = "firebase") {
       return () => unsubscribe();
     }
 
-    //--------------------------------------------------
-    // 🖥 LOCAL FLASK MODE
-    //--------------------------------------------------
+    // local flask mode
     if (mode === "local") {
       console.log("🖥 Local Flask Mode Enabled");
 
@@ -144,6 +130,5 @@ export default function useSensorData(mode = "firebase") {
     }
   }, [mode]);
 
-  //---------------------------------------
   return { sensorData, forecastData };
 }

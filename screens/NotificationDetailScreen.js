@@ -9,7 +9,7 @@ export default function NotificationDetailScreen({ route, navigation }) {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* TopBar with Back Button */}
+      {/* top bar with back button */}
       <TopBar
         showBack
         onBackPress={() => navigation.goBack()}

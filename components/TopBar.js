@@ -17,7 +17,7 @@ export default function TopBar({ onNotificationsPress, onBackPress, showBack = f
   return (
     <SafeAreaView edges={["top"]} style={[styles.safe, { backgroundColor: colors.card }]}>
       <View style={[styles.row, { borderBottomColor: colors.border }]}>
-        {/* Left side: Back button or spacer */}
+        {/* left side: back button or spacer */}
         <View style={styles.left}>
           {showBack ? (
             <TouchableOpacity
@@ -36,7 +36,7 @@ export default function TopBar({ onNotificationsPress, onBackPress, showBack = f
           )}
         </View>
 
-        {/* Right icons */}
+        {/* right icons */}
         <View style={styles.right}>
           <TouchableOpacity
             onPress={onNotificationsPress}
@@ -44,7 +44,7 @@ export default function TopBar({ onNotificationsPress, onBackPress, showBack = f
           >
             <Ionicons name="notifications-outline" size={22} color={colors.text} />
 
-            {/* Badge for notifications */}
+            {/* badge for notifications */}
             {badgeCount > 0 && (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{badgeCount}</Text>
@@ -52,7 +52,7 @@ export default function TopBar({ onNotificationsPress, onBackPress, showBack = f
             )}
           </TouchableOpacity>
 
-          {/* Profile button */}
+          {/* profile button */}
           <TouchableOpacity
             onPress={() => setMenuOpen(true)}
             style={[styles.iconBtn, { backgroundColor: colors.background }]}
@@ -62,7 +62,7 @@ export default function TopBar({ onNotificationsPress, onBackPress, showBack = f
         </View>
       </View>
 
-      {/* Simple dropdown menu using Modal */}
+      {/* dropdown menu */}
       <Modal transparent visible={menuOpen} animationType="fade" onRequestClose={() => setMenuOpen(false)}>
         <Pressable style={styles.backdrop} onPress={() => setMenuOpen(false)}>
           <View />
@@ -94,7 +94,9 @@ export default function TopBar({ onNotificationsPress, onBackPress, showBack = f
 }
 
 const styles = StyleSheet.create({
-  safe: { width: "100%" },
+  safe: {
+    width: "100%"
+  },
   row: {
     width: "100%",
     paddingHorizontal: 12,
@@ -104,9 +106,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  left: { flexDirection: "row", alignItems: "center", flex: 1 },
-  right: { flexDirection: "row", gap: 8 },
-  placeholderBox: { height: 36, borderRadius: 6, flex: 1, opacity: 0.4 },
+  left: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1
+  },
+  right: {
+    flexDirection: "row",
+    gap: 8
+  },
+  placeholderBox: {
+    height: 36,
+    borderRadius: 6,
+    flex: 1,
+    opacity: 0.4
+  },
   iconBtn: {
     width: 36,
     height: 36,
@@ -123,7 +137,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -4,
     right: -4,
-    backgroundColor: "#FF3B30", // Red background
+    backgroundColor: "#FF3B30",
     borderRadius: 10,
     width: 18,
     height: 18,
@@ -135,14 +149,16 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "bold",
   },
-
-  // Menu
   backdrop: {
-    position: "absolute", left: 0, right: 0, top: 0, bottom: 0,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
   menu: {
     position: "absolute",
-    top: 56, // just below top bar
+    top: 56,
     right: 12,
     width: 220,
     borderRadius: 12,
@@ -154,8 +170,22 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
   },
-  menuHeader: { fontSize: 12, opacity: 0.7 },
-  menuUser: { fontSize: 14, fontWeight: "700", marginTop: 2 },
-  menuDivider: { height: 1, marginVertical: 10, opacity: 0.6 },
-  menuItem: { flexDirection: "row", alignItems: "center" },
+  menuHeader: {
+    fontSize: 12,
+    opacity: 0.7
+  },
+  menuUser: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginTop: 2
+  },
+  menuDivider: {
+    height: 1,
+    marginVertical: 10,
+    opacity: 0.6
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center"
+  },
 });

@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);           // null = signed out
   const [booting, setBooting] = useState(true);     // optional: splash/loader gating
 
-  // Keep app in sync with Firebase session
+  // keep app in sync with Firebase session
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
@@ -47,7 +47,7 @@ export function AuthProvider({ children }) {
   };
 
   const continueAsGuest = async () => {
-    // Enable Anonymous in Firebase Console to use this
+    // enable anonymous in Firebase Console to use this
     const cred = await signInAnonymously(auth);
     return cred.user;
   };

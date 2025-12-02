@@ -27,7 +27,6 @@ export default function WelcomeScreen({ navigation }) {
     try {
       setBusy(true);
       await signIn(email.trim(), password);
-      // onAuthStateChanged in auth.js will switch stacks automatically
     } catch (err) {
       Alert.alert("Sign in failed", err?.message || "Please try again.");
     } finally {
@@ -53,14 +52,14 @@ export default function WelcomeScreen({ navigation }) {
     >
       <View style={styles.overlay}>
         <Image
-          source={require("../assets/kelong1.png")}   // ← your logo path
+          source={require("../assets/kelong1.png")}
           style={styles.logo}
         />
         <Text style={[styles.subtitle, { color: colors.text }]}>
           Sign in or continue as a guest
         </Text>
 
-        {/* Auth Card */}
+        {/* auth card */}
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <TextInput
             placeholder="Email"
@@ -100,7 +99,7 @@ export default function WelcomeScreen({ navigation }) {
             <Text style={[styles.ghostText, { color: colors.text }]}>Create account</Text>
           </TouchableOpacity>
 
-          {/* Continue as Guest */}
+          {/* continue as guest */}
           <TouchableOpacity
             disabled={busy}
             style={[styles.ghostBtn, { borderColor: colors.border }]}
@@ -118,10 +117,29 @@ export default function WelcomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  background: { flex: 1, width: "100%", height: "100%", alignItems: "center" },
-  overlay: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 24, width: "100%" },
-  title: { fontSize: 28, fontWeight: "bold", marginBottom: 6 },
-  subtitle: { fontSize: 14, opacity: 0.8, marginBottom: 18 },
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    alignItems: "center"
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    width: "100%"
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 6
+  },
+  subtitle: {
+    fontSize: 14,
+    opacity: 0.8,
+    marginBottom: 18
+  },
   card: {
     width: "100%",
     maxWidth: 420,
@@ -145,7 +163,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 12,
   },
-  primaryText: { color: "#fff", fontWeight: "700" },
+  primaryText: {
+    color: "#fff",
+    fontWeight: "700"
+  },
   ghostBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -155,7 +176,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderWidth: StyleSheet.hairlineWidth,
   },
-  ghostText: { fontWeight: "700" },
+  ghostText: {
+    fontWeight: "700"
+  },
   circleButton: {
     width: 65,
     height: 65,
@@ -175,7 +198,7 @@ const styles = StyleSheet.create({
     height: 350,
     resizeMode: "contain",
     alignSelf: "center",
-    marginBottom: -110,     // ⬅ less space below the logo
-    marginTop: -20,      // ⬅ pull the logo upward
+    marginBottom: -110,
+    marginTop: -20,
   },
 });
