@@ -37,7 +37,7 @@ export default function WelcomeScreen({ navigation }) {
   const handleGuest = async () => {
     try {
       setBusy(true);
-      await continueAsGuest(); // uses Firebase Anonymous if enabled; otherwise stub
+      await continueAsGuest(); // uses Firebase Anonymous if enabled, otherwise stub
     } catch (err) {
       Alert.alert("Guest sign-in failed", err?.message || "Please try again.");
     } finally {
@@ -89,7 +89,7 @@ export default function WelcomeScreen({ navigation }) {
             <Text style={styles.primaryText}>{busy ? "Signing in..." : "Sign In"}</Text>
           </TouchableOpacity>
 
-          {/* Create account */}
+          {/* create account */}
           <TouchableOpacity
             style={[styles.ghostBtn, { borderColor: colors.border, marginTop: 10 }]}
             onPress={() => navigation.navigate("SignUp")}

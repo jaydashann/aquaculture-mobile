@@ -15,7 +15,7 @@ export default function MainScreen({ navigation }) {
   const [scaleMode, setScaleMode] = useState("raw");
   const [notifications, setNotifications] = useState([]);
   const [aeratorStatus, setAeratorStatus] = useState({
-    isActive: false, // off as initial state
+    isActive: false, // off is initial state
     lastUpdated: "10/11/2025, 7:49:41 PM",
   });
 
@@ -80,6 +80,7 @@ export default function MainScreen({ navigation }) {
 
   // data for FlatList rendering
   const renderItems = [
+// debug info section
 //    {
 //      type: "debug",
 //      content: <DebugInfo data={sensorData} />,

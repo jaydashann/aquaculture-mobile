@@ -17,7 +17,7 @@ export default function SignUpScreen({ navigation }) {
     try {
       if (!email || !password) throw new Error("Please enter email and password.");
       setBusy(true);
-      await signUp(email.trim(), password, displayName.trim());\
+      await signUp(email.trim(), password, displayName.trim());
     } catch (err) {
       Alert.alert("Sign up failed", err?.message || "Please try again.");
     } finally {
