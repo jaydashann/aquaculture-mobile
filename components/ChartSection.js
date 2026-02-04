@@ -113,7 +113,7 @@ export default function ChartSection({ sensorData, scaleMode, setScaleMode }) {
         backgroundColor="#0f172a"
         spacing={50}
         xAxisLabelStyle={{
-          color: "#94a3b8",
+          color: "#ffffff",
           fontSize: 10,
           textAlign: "center",
         }}

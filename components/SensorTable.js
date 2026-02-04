@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, FlatList } from "react-native";
+import { View, Text, FlatList, ScrollView } from "react-native"; // 1. Import ScrollView
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import styles from "../styles/MainScreenStyles";
 
@@ -11,36 +11,45 @@ export default function SensorTable({ sensorData = [] }) {
         <Text style={styles.sensorHeaderText}>Live Data Stream</Text>
       </View>
 
-      <View style={styles.tableHeader}>
-        <Text style={[styles.th, styles.colTime]}>Time</Text>
-        <Text style={[styles.thNum, styles.colPh]}>pH</Text>
-        <Text style={[styles.thNum, styles.colTemp]}>Temp (°C)</Text>
-        <Text style={[styles.thNum, styles.colTurb]}>Turbidity</Text>
-        <Text style={[styles.thNum, styles.colTds]}>TDS</Text>
-      </View>
+      {/* 2. Wrap the entire table in a horizontal ScrollView */}
+      <ScrollView horizontalShowsHorizontalScrollIndicator={true} horizontal={true}>
+        <View>
+          {/* Header Row */}
+          <View style={styles.tableHeader}>
+            <Text style={[styles.th, styles.colTime]}>Time</Text>
+            <Text style={[styles.thNum, styles.colPh]}>pH</Text>
+            <Text style={[styles.thNum, styles.colTemp]}>Temp (°C)</Text>
+            <Text style={[styles.thNum, styles.colTurb]}>Turbidity</Text>
+            <Text style={[styles.thNum, styles.colTds]}>TDS</Text>
+            <Text style={[styles.thNum, styles.colAerator]}>Aerator</Text>
+          </View>
 
-      <FlatList
-        data={sensorData}
-        keyExtractor={(i) => i.id}
-        renderItem={({ item, index }) => (
-          <View style={[styles.tableRow, index % 2 === 0 && styles.zebraRow]}>
-            <Text style={[styles.td, styles.colTime]}>{item.time}</Text>
-            <Text style={[styles.tdNum, styles.colPh]}>{item.ph}</Text>
-            <Text style={[styles.tdNum, styles.colTemp]}>{item.temp}</Text>
-            <Text style={[styles.tdNum, styles.colTurb]}>{item.turbidity}</Text>
-            <Text style={[styles.tdNum, styles.colTds]}>{item.tds}</Text>
-          </View>
-        )}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <MaterialCommunityIcons name="database-off" size={48} color="#64748b" />
-            <Text style={styles.emptyText}>Waiting for sensor data...</Text>
-            <Text style={styles.emptySubtext}>
-              Make sure your ESP8266 or Pi server is connected
-            </Text>
-          </View>
-        )}
-      />
+          {/* Data List */}
+          <FlatList
+            data={sensorData}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item, index }) => (
+              <View style={[styles.tableRow, index % 2 === 0 && styles.zebraRow]}>
+                <Text style={[styles.td, styles.colTime]}>{item.time}</Text>
+                <Text style={[styles.tdNum, styles.colPh]}>{item.ph}</Text>
+                <Text style={[styles.tdNum, styles.colTemp]}>{item.temp}</Text>
+                <Text style={[styles.tdNum, styles.colTurb]}>{item.turbidity}</Text>
+                <Text style={[styles.tdNum, styles.colTds]}>{item.tds}</Text>
+
+                  <View style={[styles.tdNum, styles.colAerator]}>
+                    <Text style={{
+                      color: item.aerator === "ON" ? "#4ade80" : "#f87171", // green for ON, red for OFF
+                      fontWeight: "bold",
+                      fontSize: 12
+                    }}>
+                      {item.aerator}
+                    </Text>
+                  </View>
+              </View>
+            )}
+          />
+        </View>
+      </ScrollView>
     </View>
   );
 }
