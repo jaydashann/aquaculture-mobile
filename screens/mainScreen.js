@@ -44,7 +44,7 @@ export default function MainScreen({ navigation }) {
     }
   };
 
-  // --- cycle OFF → ON → AUTO ---
+  // --- cycle OFF > ON > AUTO ---
   const cycleAeratorMode = async () => {
     let nextMode = "OFF";
 
