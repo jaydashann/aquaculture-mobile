@@ -1,25 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Switch, FlatList } from "react-native";
 import { useTheme } from "@react-navigation/native";
+
 import TopBar from "../components/TopBar";
 import ChartSection from "../components/ChartSection";
 import StatusCard from "../components/StatusCard";
 import SensorTable from "../components/SensorTable";
-import DebugInfo from "../components/DebugInfo";
 import useSensorData from "../hooks/useSensorData";
 import styles from "../styles/MainScreenStyles";
 
 export default function MainScreen({ navigation }) {
   const { colors } = useTheme();
-  const [mode, setMode] = useState("firebase"); // firebase | local
+
+  const [mode, setMode] = useState("firebase");
   const [scaleMode, setScaleMode] = useState("raw");
+
   const [notifications, setNotifications] = useState([]);
+
   const [aeratorStatus, setAeratorStatus] = useState({
-    isActive: false, // off is initial state
-    lastUpdated: "10/11/2025, 7:49:41 PM",
+    mode: "OFF",
+    isActive: false,
   });
 
-  // fetch notification from flask backend
+  // --- fetch Notifications ---
   const fetchNotifications = async () => {
     try {
       const response = await fetch("http://192.168.100.7:5000/notifications");
@@ -30,44 +33,52 @@ export default function MainScreen({ navigation }) {
     }
   };
 
-  // fetch aerator status
+  // --- fetch aerator status ---
   const fetchAeratorStatus = async () => {
     try {
       const response = await fetch("http://192.168.100.7:5000/aerator-status");
       const data = await response.json();
       setAeratorStatus(data);
     } catch (error) {
-      console.warn("Aerator status not found, using default state.");
+      console.warn("Aerator status not found.");
     }
   };
 
-  const toggleAerator = async () => {
+  // --- cycle OFF → ON → AUTO ---
+  const cycleAeratorMode = async () => {
+    let nextMode = "OFF";
+
+    if (aeratorStatus.mode === "OFF") nextMode = "ON";
+    else if (aeratorStatus.mode === "ON") nextMode = "AUTO";
+    else if (aeratorStatus.mode === "AUTO") nextMode = "OFF";
+
     try {
-      const newStatus = aeratorStatus.isActive ? "OFF" : "ON";  // toggle to on and off
-      const response = await fetch("http://192.168.100.7:5000/aerator-status", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: newStatus }), // send "status" instead of "isActive"
-      });
+      const response = await fetch(
+        "http://192.168.100.7:5000/aerator-status",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ mode: nextMode }),
+        }
+      );
+
       const data = await response.json();
+
       if (data.status === "success") {
-        setAeratorStatus({
-          isActive: newStatus === "ON",  // update the active state based on the new status
-          lastUpdated: data.lastUpdated,
-        });
+        fetchAeratorStatus();
       }
     } catch (error) {
-      console.error("Error toggling aerator", error);
+      console.error("Error changing aerator mode:", error);
     }
   };
 
+  // --- auto refresh ---
   useEffect(() => {
     fetchNotifications();
     fetchAeratorStatus();
 
-    // auto-refresh aerator status every 5 seconds
     const interval = setInterval(() => {
       fetchNotifications();
       fetchAeratorStatus();
@@ -78,13 +89,8 @@ export default function MainScreen({ navigation }) {
 
   const { sensorData, forecastData } = useSensorData(mode);
 
-  // data for FlatList rendering
+  // --- flatList items ---
   const renderItems = [
-// debug info section
-//    {
-//      type: "debug",
-//      content: <DebugInfo data={sensorData} />,
-//    },
     {
       type: "modeSwitch",
       content: (
@@ -97,7 +103,6 @@ export default function MainScreen({ navigation }) {
               : "🎨 Demo Mode"}
           </Text>
 
-          {/* cycle through the 3 modes */}
           <Switch
             value={mode !== "firebase"}
             onValueChange={() => {
@@ -109,6 +114,7 @@ export default function MainScreen({ navigation }) {
         </View>
       ),
     },
+
     {
       type: "chartSection",
       content: (
@@ -120,18 +126,26 @@ export default function MainScreen({ navigation }) {
         />
       ),
     },
+
     {
       type: "aeratorStatus",
       content: (
         <StatusCard
           title="Aerator"
-          subtitle={`Since ${aeratorStatus.lastUpdated}`}
-          icon="autorenew"
+          subtitle={`Mode: ${aeratorStatus.mode}`}
+          icon={
+            aeratorStatus.mode === "AUTO"
+              ? "autorenew"
+              : aeratorStatus.mode === "ON"
+              ? "power"
+              : "power-off"
+          }
           active={aeratorStatus.isActive}
-          onPress={toggleAerator}
+          onPress={cycleAeratorMode}
         />
       ),
     },
+
     {
       type: "notification",
       content: (
@@ -144,6 +158,7 @@ export default function MainScreen({ navigation }) {
         />
       ),
     },
+
     {
       type: "sensorTable",
       content: <SensorTable sensorData={sensorData} />,
@@ -152,11 +167,11 @@ export default function MainScreen({ navigation }) {
 
   return (
     <View style={[styles.background, { backgroundColor: colors.background }]}>
-      {/* --- top bar --- */}
       <TopBar
         onNotificationsPress={() => navigation.navigate("Notifications")}
         badgeCount={notifications.length}
       />
+
       <FlatList
         data={renderItems}
         keyExtractor={(item, index) => index.toString()}

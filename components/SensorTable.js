@@ -11,10 +11,9 @@ export default function SensorTable({ sensorData = [] }) {
         <Text style={styles.sensorHeaderText}>Live Data Stream</Text>
       </View>
 
-      {/* 2. Wrap the entire table in a horizontal ScrollView */}
       <ScrollView horizontalShowsHorizontalScrollIndicator={true} horizontal={true}>
         <View>
-          {/* Header Row */}
+          {/* header row */}
           <View style={styles.tableHeader}>
             <Text style={[styles.th, styles.colTime]}>Time</Text>
             <Text style={[styles.thNum, styles.colPh]}>pH</Text>
@@ -24,7 +23,7 @@ export default function SensorTable({ sensorData = [] }) {
             <Text style={[styles.thNum, styles.colAerator]}>Aerator</Text>
           </View>
 
-          {/* Data List */}
+          {/* data list */}
           <FlatList
             data={sensorData}
             keyExtractor={(item) => item.id.toString()}
