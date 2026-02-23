@@ -26,8 +26,8 @@ export default StyleSheet.create({
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      marginHorizontal: 20,
-      marginBottom: 10,
+      marginHorizontal: 25,
+      marginTop: 10,
     },
     modeLabel: {
       color: "#cbd5e1",
@@ -145,7 +145,7 @@ export default StyleSheet.create({
     sensorHeader: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 10
+      marginBottom: 15
     },
     sensorHeaderText: {
       color: "#a5b4fc",

@@ -15,7 +15,7 @@ export default function StatusCard({
   disabled = false,
 }) {
   const bgColor = color || "#1e293b";
-  const statusColor = active ? "#22c55e" : "#ef4444";
+  const statusColor = active ? "#ef4444" : "#22c55e";
   const Container = onPress ? TouchableOpacity : View;
 
   return (
@@ -46,7 +46,7 @@ export default function StatusCard({
 
       {!disabled && typeof active !== "undefined" && (
         <View style={[styles.statusBadge, { backgroundColor: statusColor }]}>
-          <Text style={styles.statusBadgeText}>{active ? "Active" : "Inactive"}</Text>
+          <Text style={styles.statusBadgeText}>{active ? "Inactive" : "Active"}</Text>
         </View>
       )}
 

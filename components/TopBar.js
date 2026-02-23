@@ -38,20 +38,6 @@ export default function TopBar({ onNotificationsPress, onBackPress, showBack = f
 
         {/* right icons */}
         <View style={styles.right}>
-          <TouchableOpacity
-            onPress={onNotificationsPress}
-            style={[styles.iconBtn, { backgroundColor: colors.background }]}
-          >
-            <Ionicons name="notifications-outline" size={22} color={colors.text} />
-
-            {/* badge for notifications */}
-            {badgeCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{badgeCount}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-
           {/* profile button */}
           <TouchableOpacity
             onPress={() => setMenuOpen(true)}

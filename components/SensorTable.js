@@ -4,6 +4,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import styles from "../styles/MainScreenStyles";
 
 export default function SensorTable({ sensorData = [] }) {
+  const reversedData = [...sensorData].reverse();
+
   return (
     <View style={styles.sensorContainer}>
       <View style={styles.sensorHeader}>
@@ -25,7 +27,7 @@ export default function SensorTable({ sensorData = [] }) {
 
           {/* data list */}
           <FlatList
-            data={sensorData}
+            data={reversedData}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item, index }) => (
               <View style={[styles.tableRow, index % 2 === 0 && styles.zebraRow]}>
