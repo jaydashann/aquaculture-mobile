@@ -1,111 +1,71 @@
-import React, { useContext, useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Modal, Pressable, Text } from "react-native";
+import React from "react";
+import { View, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ColorModeContext } from "../colorMode";
-import { useAuth } from "../auth";
 
-export default function TopBar({ onNotificationsPress, onBackPress, showBack = false, badgeCount = 0 }) {
-  const { colors, tokens } = useTheme();
-  const { mode, toggleColorMode } = useContext(ColorModeContext);
-  const { user, signOut } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const displayName = user?.displayName || "Guest";
+export default function TopBar({ onBackPress, showBack = false }) {
+  const { colors } = useTheme();
 
   return (
     <SafeAreaView edges={["top"]} style={[styles.safe, { backgroundColor: colors.card }]}>
       <View style={[styles.row, { borderBottomColor: colors.border }]}>
-        {/* left side: back button or spacer */}
-        <View style={styles.left}>
-          {showBack ? (
+
+        {/* Left Section: Back Button or Spacer */}
+        <View style={styles.section}>
+          {showBack && (
             <TouchableOpacity
               onPress={onBackPress}
               style={[styles.iconBtn, { backgroundColor: colors.background }]}
             >
               <Ionicons name="arrow-back" size={22} color={colors.text} />
             </TouchableOpacity>
-          ) : (
-            <View
-              style={[
-                styles.placeholderBox,
-                { backgroundColor: tokens?.primary?.[400] || colors.primary, opacity: 0.4 },
-              ]}
-            />
           )}
         </View>
 
-        {/* right icons */}
-        <View style={styles.right}>
-          {/* profile button */}
-          <TouchableOpacity
-            onPress={() => setMenuOpen(true)}
-            style={[styles.iconBtn, { backgroundColor: colors.background }]}
-          >
-            <Ionicons name="person-circle-outline" size={24} color={colors.text} />
-          </TouchableOpacity>
+        {/* Center Section: App Logo Image */}
+        <View style={styles.centerSection}>
+          <Image
+            source={require("../assets/kelong1.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
         </View>
+
+        {/* Right Section: Balanced Spacer to maintain center alignment */}
+        <View style={styles.section} />
+
       </View>
-
-      {/* dropdown menu */}
-      <Modal transparent visible={menuOpen} animationType="fade" onRequestClose={() => setMenuOpen(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setMenuOpen(false)}>
-          <View />
-        </Pressable>
-
-        <View style={[styles.menu, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.menuHeader, { color: colors.text }]}>Signed in as</Text>
-          <Text style={[styles.menuUser, { color: colors.text }]} numberOfLines={1}>
-            {displayName}{user?.isGuest ? " (Guest)" : ""}
-          </Text>
-
-          <View style={[styles.menuDivider, { backgroundColor: colors.border }]} />
-
-          <TouchableOpacity
-            onPress={async () => {
-              setMenuOpen(false);
-              await signOut();
-            }}
-            style={styles.menuItem}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="log-out-outline" size={18} color={colors.text} style={{ marginRight: 8 }} />
-            <Text style={{ color: colors.text, fontWeight: "600" }}>Log out</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: {
-    width: "100%"
+    width: "100%",
   },
   row: {
     width: "100%",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8, // Reduced vertical padding slightly for images
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  left: {
+  section: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    flex: 1
   },
-  right: {
-    flexDirection: "row",
-    gap: 8
+  centerSection: {
+    flex: 2,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  placeholderBox: {
-    height: 36,
-    borderRadius: 6,
-    flex: 1,
-    opacity: 0.4
+  logoImage: {
+    width: 120, // Adjust width based on your logo's aspect ratio
+    height: 40,  // Standard header height for logos
   },
   iconBtn: {
     width: 36,
@@ -114,64 +74,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 2,
     shadowOffset: { width: 0, height: 1 },
-  },
-  badge: {
-    position: "absolute",
-    top: -4,
-    right: -4,
-    backgroundColor: "#FF3B30",
-    borderRadius: 10,
-    width: 18,
-    height: 18,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  badgeText: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  backdrop: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  },
-  menu: {
-    position: "absolute",
-    top: 56,
-    right: 12,
-    width: 220,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: 12,
-    elevation: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-  },
-  menuHeader: {
-    fontSize: 12,
-    opacity: 0.7
-  },
-  menuUser: {
-    fontSize: 14,
-    fontWeight: "700",
-    marginTop: 2
-  },
-  menuDivider: {
-    height: 1,
-    marginVertical: 10,
-    opacity: 0.6
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center"
   },
 });

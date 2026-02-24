@@ -15,31 +15,53 @@ export default function ForecastScreen({ navigation }) {
   const [mode, setMode] = useState("firebase");
   const [scaleMode, setScaleMode] = useState("raw");
 
-  const [notifications, setNotifications] = useState([]);
+  const { sensorData, forecastData } = useSensorData(mode);
 
-  // --- fetch Notifications ---
-  const fetchNotifications = async () => {
+  const [aeratorStatus, setAeratorStatus] = useState({
+    mode: "OFF",
+    isActive: false,
+  });
+
+  // --- fetch aerator status ---
+  const fetchAeratorStatus = async () => {
     try {
-      const response = await fetch("http://192.168.100.7:5000/notifications");
+      const response = await fetch("http://192.168.100.7:5000/aerator-status");
       const data = await response.json();
-      setNotifications(data);
+      setAeratorStatus(data);
     } catch (error) {
-      console.error("Error fetching notifications", error);
+      console.warn("Aerator status not found.");
     }
   };
 
-  // --- auto refresh ---
-  useEffect(() => {
-    fetchNotifications();
+  // --- cycle OFF > ON > AUTO ---
+  const cycleAeratorMode = async () => {
+    let nextMode = "OFF";
 
-    const interval = setInterval(() => {
-      fetchNotifications();
-    }, 5000);
+    if (aeratorStatus.mode === "OFF") nextMode = "ON";
+    else if (aeratorStatus.mode === "ON") nextMode = "AUTO";
+    else if (aeratorStatus.mode === "AUTO") nextMode = "OFF";
 
-    return () => clearInterval(interval);
-  }, []);
+    try {
+      const response = await fetch(
+        "http://192.168.100.7:5000/aerator-status",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ mode: nextMode }),
+        }
+      );
 
-  const { sensorData, forecastData } = useSensorData(mode);
+      const data = await response.json();
+
+      if (data.status === "success") {
+        fetchAeratorStatus();
+      }
+    } catch (error) {
+      console.error("Error changing aerator mode:", error);
+    }
+  };
 
   // --- flatList items ---
   const renderItems = [
@@ -66,7 +88,24 @@ export default function ForecastScreen({ navigation }) {
         </View>
       ),
     },
-
+    {
+      type: "aeratorStatus",
+      content: (
+        <StatusCard
+          title="Aerator"
+          subtitle={`Mode: ${aeratorStatus.mode}`}
+          icon={
+            aeratorStatus.mode === "AUTO"
+              ? "autorenew"
+              : aeratorStatus.mode === "ON"
+              ? "power"
+              : "power-off"
+          }
+          active={aeratorStatus.isActive}
+          onPress={cycleAeratorMode}
+        />
+      ),
+    },
     {
       type: "chartSection",
       content: (
@@ -78,27 +117,11 @@ export default function ForecastScreen({ navigation }) {
         />
       ),
     },
-
-    {
-      type: "notification",
-      content: (
-        <StatusCard
-          title="Notifications"
-          subtitle={`You have ${notifications.length} new notifications`}
-          icon="bell-ring"
-          onPress={() => navigation.navigate("Notifications")}
-          color="#3b82f6"
-        />
-      ),
-    },
   ];
 
   return (
     <View style={[styles.background, { backgroundColor: colors.background }]}>
-      <TopBar
-        onNotificationsPress={() => navigation.navigate("Notifications")}
-        badgeCount={notifications.length}
-      />
+      <TopBar />
 
       <FlatList
         data={renderItems}
