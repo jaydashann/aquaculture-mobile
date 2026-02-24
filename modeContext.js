@@ -3,7 +3,7 @@ import React, { createContext, useState, useContext } from 'react';
 const ModeContext = createContext();
 
 export const ModeProvider = ({ children }) => {
-  const [mode, setMode] = useState("firebase"); // Default global mode
+  const [mode, setMode] = useState("firebase");
 
   const cycleMode = () => {
     if (mode === "firebase") setMode("local");
@@ -18,4 +18,4 @@ export const ModeProvider = ({ children }) => {
   );
 };
 
-export const useDataMode = () => useContext(ModeContext);
+export const useMode = () => useContext(ModeContext);

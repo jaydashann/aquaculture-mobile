@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Switch } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { Ionicons } from '@expo/vector-icons';
 
@@ -7,11 +7,13 @@ import TopBar from "../components/TopBar";
 import StatusCard from "../components/StatusCard";
 import { useAuth } from "../auth"; // 1. Import useAuth
 import styles from "../styles/MainScreenStyles";
+import { useMode } from "../modeContext";
 
 export default function UserScreen({ navigation }) {
   const { colors } = useTheme();
   const { user, signOut } = useAuth(); // 2. Destructure user and signOut
   const [notifications, setNotifications] = useState([]);
+  const { mode, cycleMode } = useMode();
 
   // --- fetch Notifications ---
   const fetchNotifications = async () => {
@@ -32,6 +34,23 @@ export default function UserScreen({ navigation }) {
 
   // 3. Add User info and Logout to the renderItems
     const renderItems = [
+    {
+      type: "settings",
+      content: (
+        <View style={localStyles.settingsContainer}>
+          {/* Data Source Toggle */}
+          <View style={localStyles.settingRow}>
+            <View>
+              <Text style={[localStyles.settingLabel, { color: colors.text }]}>Data Source</Text>
+              <Text style={{ color: colors.text, opacity: 0.6, fontSize: 12 }}>
+                {mode === "firebase" ? "Firebase" : mode === "local" ? "Local" : "Demo Mode"}
+              </Text>
+            </View>
+            <Switch value={mode !== "firebase"} onValueChange={cycleMode} />
+          </View>
+        </View>
+      )
+    },
       {
         type: "profileHeader",
         content: (
@@ -141,4 +160,19 @@ const localStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  settingsContainer: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 15,
+    padding: 15,
+    marginVertical: 10,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  settingLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  }
 });

@@ -9,11 +9,12 @@ import SensorTable from "../components/SensorTable";
 import useSensorData from "../hooks/useSensorData";
 import styles from "../styles/MainScreenStyles";
 
+import { useMode } from "../modeContext";
+
 export default function ForecastScreen({ navigation }) {
   const { colors } = useTheme();
 
-  const [mode, setMode] = useState("firebase");
-  const [scaleMode, setScaleMode] = useState("raw");
+  const { mode, scaleMode, setScaleMode } = useMode();
 
   const { sensorData, forecastData } = useSensorData(mode);
 
@@ -65,29 +66,6 @@ export default function ForecastScreen({ navigation }) {
 
   // --- flatList items ---
   const renderItems = [
-    {
-      type: "modeSwitch",
-      content: (
-        <View style={styles.modeSwitch}>
-          <Text style={styles.modeLabel}>
-            {mode === "firebase"
-              ? "☁️ Firebase Cloud Mode"
-              : mode === "local"
-              ? "📡 Local Flask Mode"
-              : "🎨 Demo Mode"}
-          </Text>
-
-          <Switch
-            value={mode !== "firebase"}
-            onValueChange={() => {
-              if (mode === "firebase") setMode("local");
-              else if (mode === "local") setMode("demo");
-              else setMode("firebase");
-            }}
-          />
-        </View>
-      ),
-    },
     {
       type: "aeratorStatus",
       content: (
