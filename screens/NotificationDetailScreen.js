@@ -22,7 +22,7 @@ export default function NotificationDetailScreen({ route, navigation }) {
         </Text>
 
         <Text style={[styles.body, { color: colors.text }]}>
-          {notification.body}
+          {notification.message}
         </Text>
 
         <View style={styles.metaBox}>

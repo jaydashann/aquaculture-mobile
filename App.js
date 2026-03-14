@@ -22,6 +22,7 @@ const Tab = createBottomTabNavigator();
 function MyTabs() {
   const { signOut, user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   return (
     <>
@@ -44,7 +45,18 @@ function MyTabs() {
         })}
       >
         <Tab.Screen name="Live Data" component={LiveScreen} />
-        <Tab.Screen name="Alerts" component={NotificationsScreen} />
+        <Tab.Screen
+            name="Alerts"
+            component={NotificationsScreen}
+            options={{
+            tabBarBadge: unreadCount > 0 ? unreadCount : null,
+            tabBarBadgeStyle: {
+                  backgroundColor: '#ef4444',
+                  color: '#ef4444',
+                  fontSize: 5,
+                }
+            }}
+        />
         <Tab.Screen name="Forecast" component={ForecastScreen} />
 
         <Tab.Screen

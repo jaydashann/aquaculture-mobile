@@ -11,7 +11,7 @@ export default function useSensorData(mode = "firebase") {
  const LOCAL_BASE = "http://192.168.100.7:5000";
 
 
- // --- 1. Demo Generator ---
+ // demo generator
  const generateRandomData = () => {
    const turb = (1 + Math.random() * 160).toFixed(2);
    const tdsVal = (100 + Math.random() * 9500).toFixed(0);
@@ -33,37 +33,37 @@ export default function useSensorData(mode = "firebase") {
  };
 
 
- // --- 2. Local Fetch (Fetch last 20 readings) ---
- const fetchLocalData = async () => {
-   try {
-     const res = await fetch(`${LOCAL_BASE}/history`); // Ensure your Flask /latest now returns last 20 readings
-     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+ // local fetch (last 20 readings)
+    const fetchLocalData = async () => {
+      try {
+        const res = await fetch(`${LOCAL_BASE}/history`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        if (!data || data.error) return;
+
+        const entries = data.map((d) => ({
+          id: Date.now().toString() + Math.random(), // unique key
+          ph: parseFloat(d.ph || 0).toFixed(2),
+          temp: parseFloat(d.temperature || 0).toFixed(2),
+          turbidity: parseFloat(d.turbidity || 0).toFixed(2),
+          tds: parseFloat(d.tds || 0).toFixed(0),
+          aerator: d.aerator_status || "OFF",
+          time: new Date(d.timestamp).toLocaleTimeString(),
+          rawTimestamp: new Date(d.timestamp).getTime(),
+        }));
+
+        const sortedEntries = entries.sort((a, b) => a.rawTimestamp - b.rawTimestamp);
+
+        setSensorData(sortedEntries.slice(-20));
+
+      } catch (err) {
+        console.log("Local fetch failed:", err.message);
+      }
+    };
 
 
-     const data = await res.json();
-     if (!data || data.error) return;
-
-
-     const entries = data.map((d) => ({
-       id: Date.now().toString() + Math.random(), // unique key
-       ph: parseFloat(d.ph || 0).toFixed(2),
-       temp: parseFloat(d.temperature || 0).toFixed(2),
-       turbidity: parseFloat(d.turbidity || 0).toFixed(2),
-       tds: parseFloat(d.tds || 0).toFixed(0),
-       aerator: d.aerator_status || "OFF",
-       time: new Date(d.timestamp).toLocaleTimeString(),
-       rawTimestamp: new Date(d.timestamp).getTime(),
-     }));
-
-
-     setSensorData(entries.slice(-20));
-   } catch (err) {
-     console.log("Local fetch failed:", err.message);
-   }
- };
-
-
- // --- 3. Fetch Forecast ---
+ // fetch forecast
  const fetchForecast = async () => {
    try {
      const res = await fetch(`${LOCAL_BASE}/forecast`);
@@ -88,7 +88,7 @@ export default function useSensorData(mode = "firebase") {
  };
 
 
- // --- 4. Main Mode Handler ---
+ // main mode
  useEffect(() => {
    let interval;
 

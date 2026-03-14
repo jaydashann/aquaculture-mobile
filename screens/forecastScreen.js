@@ -15,7 +15,6 @@ export default function ForecastScreen({ navigation }) {
   const { colors } = useTheme();
 
   const { mode, scaleMode, setScaleMode } = useMode();
-
   const { sensorData, forecastData } = useSensorData(mode);
 
   const [aeratorStatus, setAeratorStatus] = useState({

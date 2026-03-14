@@ -38,7 +38,6 @@ export default StyleSheet.create({
       backgroundColor: "#0f172a",
       borderRadius: 12,
       marginHorizontal: 20,
-      marginVertical: 10,
       padding: 15,
     },
     chartHeaderRow: {
@@ -95,7 +94,7 @@ export default StyleSheet.create({
       paddingHorizontal: 20,
       borderRadius: 12,
       marginHorizontal: 20,
-      marginVertical: 10,
+      marginVertical: 20,
     },
     statusIconWrapper: {
       width: 40,

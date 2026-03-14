@@ -6,6 +6,35 @@ import styles from "../styles/MainScreenStyles";
 export default function SensorTable({ sensorData = [] }) {
   const reversedData = [...sensorData].reverse();
 
+  const getStatusColor = (type, value) => {
+    const val = parseFloat(value);
+    let isUnsafe = false;
+
+    switch (type) {
+      case 'ph':
+        isUnsafe = val < 6 || val > 9.5;
+        break;
+      case 'temp':
+        isUnsafe = val < 21 || val > 36;
+        break;
+      case 'turbidity':
+        isUnsafe = val > 150;
+        break;
+      case 'tds':
+        isUnsafe = val > 9000;
+        break;
+      default:
+        isUnsafe = false;
+    }
+
+    return isUnsafe ? "#f87171" : "#ffffff";
+  };
+
+  const getStyle = (type, value) => ({
+    color: getStatusColor(type, value),
+    fontWeight: getStatusColor(type, value) === "#f87171" ? "bold" : "normal"
+  });
+
   return (
     <View style={styles.sensorContainer}>
       <View style={styles.sensorHeader}>
@@ -32,20 +61,28 @@ export default function SensorTable({ sensorData = [] }) {
             renderItem={({ item, index }) => (
               <View style={[styles.tableRow, index % 2 === 0 && styles.zebraRow]}>
                 <Text style={[styles.td, styles.colTime]}>{item.time}</Text>
-                <Text style={[styles.tdNum, styles.colPh]}>{item.ph}</Text>
-                <Text style={[styles.tdNum, styles.colTemp]}>{item.temp}</Text>
-                <Text style={[styles.tdNum, styles.colTurb]}>{item.turbidity}</Text>
-                <Text style={[styles.tdNum, styles.colTds]}>{item.tds}</Text>
 
-                  <View style={[styles.tdNum, styles.colAerator]}>
-                    <Text style={{
-                      color: item.aerator === "ON" ? "#4ade80" : "#f87171", // green for ON, red for OFF
-                      fontWeight: "bold",
-                      fontSize: 12
-                    }}>
-                      {item.aerator}
-                    </Text>
-                  </View>
+                <Text style={[styles.tdNum, styles.colPh, getStyle('ph', item.ph)]}>
+                    {item.ph}
+                </Text>
+                <Text style={[styles.tdNum, styles.colTemp, getStyle('temp', item.temp)]}>
+                    {item.temp}
+                </Text>
+                <Text style={[styles.tdNum, styles.colTurb, getStyle('turbidity', item.turbidity)]}>
+                    {item.turbidity}
+                </Text>
+                <Text style={[styles.tdNum, styles.colTds, getStyle('tds', item.tds)]}>
+                    {item.tds}
+                </Text>
+                <View style={[styles.tdNum, styles.colAerator]}>
+                  <Text style={{
+                    color: item.aerator === "ON" ? "#4ade80" : "#f87171",
+                    fontWeight: "bold",
+                    fontSize: 12
+                  }}>
+                    {item.aerator}
+                  </Text>
+                </View>
               </View>
             )}
           />

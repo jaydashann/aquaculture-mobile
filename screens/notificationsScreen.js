@@ -7,6 +7,13 @@ import TopBar from "../components/TopBar";
 export default function NotificationsScreen({ navigation }) {
   const { colors } = useTheme();
   const [notifications, setNotifications] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchNotifications();
+    setRefreshing(false);
+  };
 
   // fetch notifications from backend
   const fetchNotifications = async () => {
@@ -90,6 +97,8 @@ export default function NotificationsScreen({ navigation }) {
         data={notifications}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         contentContainerStyle={styles.list}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
       />

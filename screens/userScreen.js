@@ -32,7 +32,7 @@ export default function UserScreen({ navigation }) {
     return () => clearInterval(interval);
   }, []);
 
-  // 3. Add User info and Logout to the renderItems
+  // add User info and Logout to the renderItems
     const renderItems = [
     {
       type: "settings",

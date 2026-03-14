@@ -4,6 +4,7 @@ const ModeContext = createContext();
 
 export const ModeProvider = ({ children }) => {
   const [mode, setMode] = useState("firebase");
+  const [scaleMode, setScaleMode] = useState("raw");
 
   const cycleMode = () => {
     if (mode === "firebase") setMode("local");
